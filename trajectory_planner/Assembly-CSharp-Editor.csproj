@@ -60,7 +60,8 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.2.2f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\TutorialInfo\Scripts\Editor\ReadmeEditor.cs" />
+    <Compile Include="Assets\Editor\TrajectoryStateTests.cs" />
+    <Compile Include="Assets\Editor\TrajectoryGeneratorTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">
@@ -575,10 +576,6 @@
       <HintPath>Library\PackageCache\com.unity.ext.nunit@031a54704bff\net40\unity-custom\nunit.framework.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="unityplastic">
-      <HintPath>Library\PackageCache\com.unity.collab-proxy@8f3c30ecd081\Lib\Editor\unityplastic.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Unity.Plastic.Antlr3.Runtime">
       <HintPath>Library\PackageCache\com.unity.collab-proxy@8f3c30ecd081\Lib\Editor\Unity.Plastic.Antlr3.Runtime.dll</HintPath>
       <Private>False</Private>
@@ -593,6 +590,10 @@
     </Reference>
     <Reference Include="Unity.VisualScripting.IonicZip">
       <HintPath>Library\PackageCache\com.unity.visualscripting@6279e2b7c485\Editor\VisualScripting.Core\Dependencies\DotNetZip\Unity.VisualScripting.IonicZip.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="unityplastic">
+      <HintPath>Library\PackageCache\com.unity.collab-proxy@8f3c30ecd081\Lib\Editor\unityplastic.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System.IO.Hashing">

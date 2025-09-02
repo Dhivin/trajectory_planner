@@ -2,36 +2,25 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// <<utility>> TrajectoryGenerator
-/// ---------------------
-/// + GeneratePath(startPosition : Vector3,
-///                endPosition : Vector3,
-///                maxVelocity : float,
-///                acceleration : float,
-///                deceleration : float,
-///                samplingInterval : float) : List&lt;Vector3&gt;
-/// ---------------------
-/// Static class that generates motion paths with
-/// trapezoidal or triangular velocity profiles.
-/// </summary>
+public struct PathPoint
+{
+    public Vector3 Position { get; }
+    public float Time { get; }
+
+    public PathPoint(Vector3 position, float time)
+    {
+        Position = position;
+        Time = time;
+    }
+}
+
 public static class TrajectoryGenerator
 {
     /// <summary>
-    /// Generates a list of Vector3 points from start to end using a
-    /// trapezoidal or triangular velocity profile.
+    /// Generates a trajectory with position and time points using a trapezoidal velocity profile.
     /// </summary>
-    /// <param name="startPosition">The starting position vector.</param>
-    /// <param name="endPosition">The ending position vector.</param>
-    /// <param name="maxVelocity">Maximum cruise velocity.</param>
-    /// <param name="acceleration">Acceleration rate.</param>
-    /// <param name="deceleration">Deceleration rate.</param>
-    /// <param name="samplingInterval">Time step between generated samples.</param>
-    /// <returns>List of sampled Vector3 positions representing the path.</returns>
-    /// <exception cref="ArgumentException">
-    /// Thrown if velocity, acceleration, deceleration, or sampling interval are not positive.
-    /// </exception>
-    public static List<Vector3> GeneratePath(
+    /// <returns>A list of PathPoint objects representing the trajectory.</returns>
+    public static List<PathPoint> GenerateTrajectory(
         Vector3 startPosition,
         Vector3 endPosition,
         float maxVelocity,
@@ -49,11 +38,11 @@ public static class TrajectoryGenerator
         float totalDistance = displacement.magnitude;
         Vector3 direction = displacement.normalized;
 
-        var path = new List<Vector3> { startPosition };
+        var trajectory = new List<PathPoint> { new PathPoint(startPosition, 0f) };
 
         if (totalDistance < Mathf.Epsilon)
         {
-            return path;
+            return trajectory;
         }
 
         // --- Calculate Profile Timings ---
@@ -65,7 +54,6 @@ public static class TrajectoryGenerator
 
         float accelerationTime, cruiseTime, decelerationTime, peakVelocity;
 
-        // Decide between triangular and trapezoidal profiles
         if (distToMaxVel + distFromMaxVel > totalDistance)
         {
             // --- Triangular Profile ---
@@ -86,44 +74,34 @@ public static class TrajectoryGenerator
 
         float totalTime = accelerationTime + cruiseTime + decelerationTime;
 
-        // --- Generate Path Points ---
+        // --- Generate Trajectory Points ---
+        float distanceAtEndOfAccel = 0.5f * acceleration * accelerationTime * accelerationTime;
+        float distanceAtEndOfCruise = distanceAtEndOfAccel + peakVelocity * cruiseTime;
+
         for (float t = samplingInterval; t <= totalTime; t += samplingInterval)
         {
             float currentDistance;
             if (t <= accelerationTime)
             {
-                // Acceleration phase
                 currentDistance = 0.5f * acceleration * t * t;
             }
             else if (t <= accelerationTime + cruiseTime)
             {
-                // Cruise phase
                 float timeInCruise = t - accelerationTime;
-                float cruiseStartDistance = 0.5f * acceleration * accelerationTime * accelerationTime;
-                currentDistance = cruiseStartDistance + peakVelocity * timeInCruise;
+                currentDistance = distanceAtEndOfAccel + peakVelocity * timeInCruise;
             }
             else
             {
-                // Deceleration phase
                 float timeInDecel = t - (accelerationTime + cruiseTime);
-                float cruiseStartDistance = 0.5f * acceleration * accelerationTime * accelerationTime;
-                float cruiseEndDistance = cruiseStartDistance + peakVelocity * cruiseTime;
-                currentDistance = cruiseEndDistance + (peakVelocity * timeInDecel - 0.5f * deceleration * timeInDecel * timeInDecel);
+                currentDistance = distanceAtEndOfCruise + (peakVelocity * timeInDecel - 0.5f * deceleration * timeInDecel * timeInDecel);
             }
-            path.Add(startPosition + direction * currentDistance);
+            trajectory.Add(new PathPoint(startPosition + direction * currentDistance, t));
         }
 
-        // --- Final Point Correction ---
-        const float tolerance = 1e-4f;
-        if (path.Count == 0 || Vector3.Distance(path[path.Count - 1], endPosition) > tolerance)
-        {
-            path.Add(endPosition);
-        }
-        else
-        {
-            path[path.Count - 1] = endPosition;
-        }
+        // --- Final goal ---
+        trajectory.Add(new PathPoint(endPosition, totalTime));
 
-        return path;
+
+        return trajectory;
     }
 }
