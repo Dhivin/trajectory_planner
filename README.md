@@ -31,7 +31,8 @@ The project follows a decoupled, three-tier architecture to separate concerns. T
    - Update object transform via `_trajectoryState.Update()` each frame.
 
 ## UML
-
+trajectory_planner
+![Alt text](uml.png?raw=true "uml")
 ## Getting Started
 
 ### Installation
